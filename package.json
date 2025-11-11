@@ -1,7 +1,34 @@
 {
-  "name": "nextn",
-  "version": "0.1.0",
-  "private": true,
+  "name": "hashify",
+  "version": "1.0.0",
+  "description": "A versatile, open-source cryptographic hash toolkit for developers. Generate, compare, and batch-process hashes with MD5, SHA-256, SHA-512, and more.",
+  "homepage": "https://hashify.cit.org.in",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Centre-for-Information-Technology-India/Hashify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Centre-for-Information-Technology-India/Hashify/issues",
+    "email": "support@cit.org.in"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Centre for Information Technology (India)",
+    "email": "contact@cit.org.in",
+    "url": "https://cit.org.in"
+  },
+  "keywords": [
+    "hash",
+    "generator",
+    "md5",
+    "sha256",
+    "sha512",
+    "cryptography",
+    "web-tool",
+    "open-source",
+    "privacy",
+    "security"
+  ],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "NODE_ENV=production next build",

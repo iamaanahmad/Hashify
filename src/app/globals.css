@@ -33,48 +33,95 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --background: 213 39% 28%; /* Desaturated dark blue: #2A4365 */
-    --foreground: 210 20% 90%;
-    --card: 213 39% 24%;
-    --card-foreground: 210 20% 90%;
-    --popover: 213 39% 24%;
-    --popover-foreground: 210 20% 90%;
-    --primary: 226 64% 33%; /* Dark blue: #1E3A8A */
-    --primary-foreground: 210 20% 98%;
-    --secondary: 213 30% 40%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 213 30% 40%;
-    --muted-foreground: 210 20% 70%;
-    --accent: 0 0% 75%; /* Silver: #C0C0C0 */
-    --accent-foreground: 220 30% 20%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 213 30% 40%;
-    --input: 213 30% 40%;
-    --ring: 0 0% 75%; /* Silver for rings */
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 213 39% 28%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 226 64% 33%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 0 0% 75%;
-    --sidebar-accent-foreground: 220 30% 20%;
-    --sidebar-border: 213 30% 40%;
-    --sidebar-ring: 0 0% 75%;
+    --background: 215 28% 15%; /* Deep dark blue: #1a2433 */
+    --foreground: 210 13% 95%; /* Almost white text */
+    --card: 215 28% 20%; /* Slightly lighter for card contrast */
+    --card-foreground: 210 13% 95%; /* Clear white text */
+    --popover: 215 28% 20%;
+    --popover-foreground: 210 13% 95%;
+    --primary: 199 89% 48%; /* Bright cyan/blue */
+    --primary-foreground: 215 28% 15%; /* Dark background for button text */
+    --secondary: 215 28% 25%; /* Medium dark blue */
+    --secondary-foreground: 210 13% 95%; /* Clear text */
+    --muted: 215 28% 30%;
+    --muted-foreground: 210 13% 65%; /* Visible muted text */
+    --accent: 199 89% 48%; /* Bright cyan to match primary */
+    --accent-foreground: 215 28% 15%; /* Dark text on accent */
+    --destructive: 0 84.2% 60.2%; /* Bright red */
+    --destructive-foreground: 215 28% 15%; /* Dark text */
+    --border: 215 28% 28%; /* Visible borders */
+    --input: 215 28% 25%;
+    --ring: 199 89% 48%; /* Bright cyan ring */
+    --chart-1: 199 89% 48%; /* Cyan */
+    --chart-2: 160 84% 50%; /* Green */
+    --chart-3: 30 84% 52%; /* Orange */
+    --chart-4: 280 85% 55%; /* Purple */
+    --chart-5: 340 89% 50%; /* Pink */
+  }
+  .theme-hacker {
+    --background: 120 15% 6%; /* Very dark green-black */
+    --foreground: 120 100% 75%; /* Bright lime green */
+    --card: 120 15% 10%;
+    --card-foreground: 120 100% 75%;
+    --popover: 120 15% 6%;
+    --popover-foreground: 120 100% 75%;
+    --primary: 120 100% 65%; /* Bright green */
+    --primary-foreground: 120 15% 6%;
+    --secondary: 120 15% 15%;
+    --secondary-foreground: 120 100% 75%;
+    --muted: 120 15% 18%;
+    --muted-foreground: 120 100% 55%;
+    --accent: 120 100% 85%; /* Very bright green */
+    --accent-foreground: 120 15% 6%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 120 15% 6%;
+    --border: 120 100% 50%;
+    --input: 120 15% 15%;
+    --ring: 120 100% 65%;
+  }
+  .theme-zen {
+    --background: 220 18% 96%; /* Very light blue-gray */
+    --foreground: 220 12% 32%; /* Dark blue-gray text */
+    --card: 220 18% 100%; /* Almost white */
+    --card-foreground: 220 12% 32%;
+    --popover: 220 18% 100%;
+    --popover-foreground: 220 12% 32%;
+    --primary: 180 42% 42%; /* Teal */
+    --primary-foreground: 220 18% 96%;
+    --secondary: 220 18% 90%;
+    --secondary-foreground: 180 42% 42%;
+    --muted: 220 18% 85%;
+    --muted-foreground: 220 12% 50%;
+    --accent: 180 42% 48%; /* Brighter teal */
+    --accent-foreground: 220 12% 32%;
+    --destructive: 350 89% 52%;
+    --destructive-foreground: 220 18% 100%;
+    --border: 220 18% 80%;
+    --input: 220 18% 88%;
+    --ring: 180 42% 42%;
+  }
+  .theme-retro {
+    --background: 40 28% 88%; /* Warm beige */
+    --foreground: 20 58% 22%; /* Dark brown text */
+    --card: 40 28% 92%; /* Very light beige */
+    --card-foreground: 20 58% 22%;
+    --popover: 40 28% 92%;
+    --popover-foreground: 20 58% 22%;
+    --primary: 0 72% 48%; /* Strong red-orange */
+    --primary-foreground: 40 28% 92%; /* Light text on dark button */
+    --secondary: 180 25% 65%; /* Muted teal */
+    --secondary-foreground: 20 58% 22%;
+    --muted: 40 28% 80%;
+    --muted-foreground: 20 58% 38%;
+    --accent: 30 84% 56%; /* Orange */
+    --accent-foreground: 20 58% 22%;
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 40 28% 92%;
+    --border: 20 58% 70%;
+    --input: 40 28% 85%;
+    --ring: 0 72% 48%;
   }
 }
 
