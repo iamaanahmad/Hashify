@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Copy, Shield, ShieldHalf, ShieldCheck, Download, FileJson, FileText, QrCode, GitCompareArrows, Search } from "lucide-react";
+import { Copy, Shield, ShieldHalf, ShieldCheck, Download, FileJson, FileText, QrCode, GitCompareArrows } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { md5 } from "@/lib/md5";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,7 +25,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { reverseHashLookup } from "@/ai/flows/reverse-hash-lookup";
 
 const algorithms = [
   {
@@ -345,89 +344,6 @@ function HashComparisonTool() {
     );
 }
 
-function ReverseHashLookupTool() {
-    const [inputHash, setInputHash] = useState('');
-    const [selectedAlgorithm, setSelectedAlgorithm] = useState('md5');
-    const [result, setResult] = useState('');
-    const [isPending, startTransition] = useTransition();
-    const { toast } = useToast();
-
-    const handleLookup = () => {
-        if (!inputHash) {
-            toast({ title: 'Please enter a hash.', variant: 'destructive' });
-            return;
-        }
-
-        startTransition(async () => {
-            setResult('');
-            try {
-                const lookupResult = await reverseHashLookup({
-                    hash: inputHash,
-                    hashType: selectedAlgorithm,
-                    email: 'test@example.com', // Per instructions, seems this is needed but can be any email.
-                    code: 'd2e3638cf54f1224'
-                });
-                setResult(lookupResult);
-            } catch (error: any) {
-                console.error('Reverse lookup failed:', error);
-                setResult('An unexpected error occurred during lookup.');
-                toast({
-                    title: "Lookup Error",
-                    description: error.message || "Could not perform reverse hash lookup.",
-                    variant: "destructive",
-                });
-            }
-        });
-    };
-    
-    return (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <Label htmlFor="hash-input">Hash</Label>
-                <Input
-                    id="hash-input"
-                    placeholder="Enter hash to look up"
-                    value={inputHash}
-                    onChange={(e) => setInputHash(e.target.value)}
-                    className="font-code"
-                />
-            </div>
-             <div className="space-y-3">
-              <Label className="font-medium">Algorithm</Label>
-              <RadioGroup
-                value={selectedAlgorithm}
-                onValueChange={setSelectedAlgorithm}
-                className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-              >
-                {algorithms.map((algo) => (
-                  <Label
-                    key={`reverse-${algo.id}`}
-                    htmlFor={`reverse-${algo.id}`}
-                    className={cn(
-                      "flex items-center space-x-3 p-4 rounded-md border-2 border-transparent bg-secondary cursor-pointer hover:border-primary/50 transition-all",
-                      selectedAlgorithm === algo.id && "border-primary ring-2 ring-primary/50"
-                    )}
-                  >
-                    <RadioGroupItem value={algo.id} id={`reverse-${algo.id}`} className="border-muted-foreground" />
-                    {algo.icon}
-                    <span className="font-semibold text-foreground">{algo.label}</span>
-                  </Label>
-                ))}
-              </RadioGroup>
-            </div>
-            <Button onClick={handleLookup} disabled={isPending}>
-                {isPending ? 'Looking up...' : 'Reverse Lookup'}
-            </Button>
-            {result && (
-                <div className="space-y-2">
-                    <Label>Result</Label>
-                    <div className="p-4 rounded-md bg-secondary font-code">{result}</div>
-                </div>
-            )}
-        </div>
-    );
-}
-
 export function HashGenerator() {
   return (
     <Card className="w-full max-w-2xl shadow-2xl bg-card">
@@ -441,19 +357,15 @@ export function HashGenerator() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="generator" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="generator" className="flex-1"><ShieldCheck className="mr-2" />Generator</TabsTrigger>
             <TabsTrigger value="comparison" className="flex-1"><GitCompareArrows className="mr-2" />Compare</TabsTrigger>
-            <TabsTrigger value="reverse-lookup" className="flex-1"><Search className="mr-2" />Lookup</TabsTrigger>
           </TabsList>
           <TabsContent value="generator" className="pt-6">
             <HashGeneratorTool />
           </TabsContent>
           <TabsContent value="comparison" className="pt-6">
             <HashComparisonTool />
-          </TabsContent>
-          <TabsContent value="reverse-lookup" className="pt-6">
-            <ReverseHashLookupTool />
           </TabsContent>
         </Tabs>
       </CardContent>
