@@ -442,9 +442,9 @@ export function HashGenerator() {
       <CardContent>
         <Tabs defaultValue="generator" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="generator"><ShieldCheck className="mr-2" />Generator</TabsTrigger>
-            <TabsTrigger value="comparison"><GitCompareArrows className="mr-2" />Compare</TabsTrigger>
-            <TabsTrigger value="reverse-lookup"><Search className="mr-2" />Lookup</TabsTrigger>
+            <TabsTrigger value="generator" className="flex-1"><ShieldCheck className="mr-2" />Generator</TabsTrigger>
+            <TabsTrigger value="comparison" className="flex-1"><GitCompareArrows className="mr-2" />Compare</TabsTrigger>
+            <TabsTrigger value="reverse-lookup" className="flex-1"><Search className="mr-2" />Lookup</TabsTrigger>
           </TabsList>
           <TabsContent value="generator" className="pt-6">
             <HashGeneratorTool />
