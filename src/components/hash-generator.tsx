@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Copy, Shield, ShieldHalf, ShieldCheck, Download, FileJson, FileText, QrCode, GitCompareArrows } from "lucide-react";
+import { Copy, Shield, ShieldHalf, ShieldCheck, Download, FileJson, FileText, QrCode, GitCompareArrows, Upload, Lightbulb, Dices, FileDown, ShieldQuestion } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { md5 } from "@/lib/md5";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +25,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const algorithms = [
   {
@@ -44,19 +46,20 @@ const algorithms = [
   },
 ];
 
-async function generateHashInternal(text: string, algorithm: string) {
-  if (text === "") {
+async function generateHashInternal(text: string, algorithm: string, salt: string = '', saltPosition: 'prefix' | 'postfix' = 'prefix') {
+  const textToHash = saltPosition === 'prefix' ? salt + text : text + salt;
+  if (textToHash === "") {
     return "";
   }
   let hash = "";
   if (algorithm === "md5") {
-    hash = md5(text);
+    hash = md5(textToHash);
   } else {
     const algoName = algorithm.toUpperCase().replace("SHA", "SHA-");
     if (typeof crypto === 'undefined' || !crypto.subtle) {
       throw new Error('Crypto API not available');
     }
-    const msgUint8 = new TextEncoder().encode(text);
+    const msgUint8 = new TextEncoder().encode(textToHash);
     const hashBuffer = await crypto.subtle.digest(algoName, msgUint8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     hash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -64,18 +67,23 @@ async function generateHashInternal(text: string, algorithm: string) {
   return hash;
 }
 
+
 function HashGeneratorTool() {
   const [inputText, setInputText] = useState("");
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("sha256");
   const [hashedOutput, setHashedOutput] = useState("");
   const [isCopied, setIsCopied] = useState(false);
+  const [useSalt, setUseSalt] = useState(false);
+  const [salt, setSalt] = useState("");
+  const [saltPosition, setSaltPosition] = useState<'prefix' | 'postfix'>("prefix");
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
   useEffect(() => {
     const generateAndSetHash = async () => {
       try {
-        const hash = await generateHashInternal(inputText, selectedAlgorithm);
+        const finalSalt = useSalt ? salt : "";
+        const hash = await generateHashInternal(inputText, selectedAlgorithm, finalSalt, saltPosition);
         setHashedOutput(hash);
       } catch (error) {
         console.error("Hashing failed:", error);
@@ -96,7 +104,15 @@ function HashGeneratorTool() {
     startTransition(() => {
       generateAndSetHash();
     });
-  }, [inputText, selectedAlgorithm, toast]);
+  }, [inputText, selectedAlgorithm, toast, useSalt, salt, saltPosition]);
+  
+  const generateRandomSalt = () => {
+    const randomBytes = new Uint8Array(16);
+    crypto.getRandomValues(randomBytes);
+    const randomSalt = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    setSalt(randomSalt);
+    toast({ title: "Generated random salt!" });
+  };
 
   const handleCopy = async () => {
     if (!hashedOutput || isPending || hashedOutput.startsWith("Error")) return;
@@ -150,6 +166,7 @@ function HashGeneratorTool() {
         text: inputText,
         algorithm: selectedAlgorithm,
         hash: hashedOutput,
+        ...(useSalt && { salt, saltPosition }),
       }, null, 2);
       mimeType = "application/json";
       filename = `${selectedAlgorithm}_hash.json`;
@@ -182,6 +199,43 @@ function HashGeneratorTool() {
             aria-label="Text to hash"
           />
         </div>
+        
+        <div className="space-y-4 rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                    <ShieldQuestion size={20} className="text-accent" />
+                    <Label htmlFor="salt-switch" className="font-medium">Salt / Pepper</Label>
+                </div>
+                <Switch id="salt-switch" checked={useSalt} onCheckedChange={setUseSalt} />
+            </div>
+            {useSalt && (
+                <div className="space-y-4 pt-4 border-t border-dashed">
+                     <div className="relative">
+                        <Label htmlFor="salt-input">Value</Label>
+                        <Input id="salt-input" placeholder="Enter custom salt/pepper or generate one" value={salt} onChange={(e) => setSalt(e.target.value)} className="pr-10" />
+                        <Button variant="ghost" size="icon" className="absolute right-1 top-6 h-8 w-8" onClick={generateRandomSalt}><Dices size={18}/></Button>
+                    </div>
+                    <div>
+                        <Label>Position</Label>
+                         <RadioGroup
+                            value={saltPosition}
+                            onValueChange={(value) => setSaltPosition(value as 'prefix' | 'postfix')}
+                            className="grid grid-cols-2 gap-4 pt-2"
+                        >
+                             <Label className="flex items-center space-x-2 p-3 rounded-md border-2 border-transparent bg-secondary/50 cursor-pointer hover:border-primary/50 transition-all text-sm">
+                                <RadioGroupItem value="prefix" id="prefix" />
+                                <span>Prefix (salt + text)</span>
+                             </Label>
+                             <Label className="flex items-center space-x-2 p-3 rounded-md border-2 border-transparent bg-secondary/50 cursor-pointer hover:border-primary/50 transition-all text-sm">
+                                <RadioGroupItem value="postfix" id="postfix" />
+                                <span>Postfix (text + salt)</span>
+                             </Label>
+                        </RadioGroup>
+                    </div>
+                </div>
+            )}
+        </div>
+
         <div className="space-y-3">
           <Label className="font-medium">Algorithm</Label>
           <RadioGroup
@@ -259,6 +313,15 @@ function HashGeneratorTool() {
       <div style={{ display: 'none' }}>
         <QRCode id="qr-code-canvas" value={hashedOutput} size={256} level={"H"} />
       </div>
+
+       <Alert className="mt-6">
+        <Lightbulb className="h-4 w-4" />
+        <AlertTitle>What are Salt and Pepper?</AlertTitle>
+        <AlertDescription className="text-sm">
+          <p className="mt-2"><strong>Salt:</strong> A unique, random string added to each input before hashing. It ensures that even identical inputs result in different hashes, protecting against pre-computed hash tables (rainbow tables).</p>
+          <p className="mt-2"><strong>Pepper:</strong> A secret, static string added before hashing, typically stored securely and separately from your data. It adds an extra layer of security, making it much harder for attackers to crack hashes even if they compromise your database.</p>
+        </AlertDescription>
+      </Alert>
     </>
   );
 }
@@ -344,6 +407,129 @@ function HashComparisonTool() {
     );
 }
 
+type BatchResult = {
+    line: number;
+    input: string;
+    hash: string;
+};
+
+function BatchHashingTool() {
+    const [results, setResults] = useState<BatchResult[]>([]);
+    const [isPending, startTransition] = useTransition();
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState('sha256');
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const { toast } = useToast();
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target?.result as string;
+            const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+
+            startTransition(async () => {
+                const newResults: BatchResult[] = await Promise.all(
+                    lines.map(async (line, index) => ({
+                        line: index + 1,
+                        input: line,
+                        hash: await generateHashInternal(line, selectedAlgorithm),
+                    }))
+                );
+                setResults(newResults);
+                toast({ title: `Processed ${newResults.length} lines.` });
+            });
+        };
+        reader.readAsText(file);
+    };
+
+    const handleDownload = (format: 'csv' | 'json') => {
+        if (results.length === 0) {
+            toast({ variant: 'destructive', title: 'No results to download.'});
+            return;
+        };
+
+        let content = '';
+        let mimeType = '';
+        let filename = `batch_hashes_${selectedAlgorithm}.${format}`;
+
+        if (format === 'json') {
+            content = JSON.stringify(results, null, 2);
+            mimeType = 'application/json';
+        } else { // csv
+            const header = 'line,input,hash\n';
+            const rows = results.map(r => `${r.line},"${r.input.replace(/"/g, '""')}",${r.hash}`).join('\n');
+            content = header + rows;
+            mimeType = 'text/csv';
+        }
+
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast({ title: `Downloaded ${filename}` });
+    };
+
+    return (
+        <div className="space-y-6">
+             <div className="space-y-3">
+                <Label className="font-medium">Algorithm</Label>
+                <RadioGroup value={selectedAlgorithm} onValueChange={setSelectedAlgorithm} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {algorithms.map((algo) => (
+                        <Label key={`batch-${algo.id}`} htmlFor={`batch-${algo.id}`}
+                            className={cn("flex items-center space-x-3 p-4 rounded-md border-2 border-transparent bg-secondary cursor-pointer hover:border-primary/50 transition-all", selectedAlgorithm === algo.id && "border-primary ring-2 ring-primary/50")}>
+                            <RadioGroupItem value={algo.id} id={`batch-${algo.id}`} className="border-muted-foreground" />
+                            {algo.icon}
+                            <span className="font-semibold text-foreground">{algo.label}</span>
+                        </Label>
+                    ))}
+                </RadioGroup>
+            </div>
+            
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".txt,.csv" className="hidden" />
+            <Button onClick={() => fileInputRef.current?.click()} className="w-full" disabled={isPending}>
+                <Upload className="mr-2" /> {isPending ? 'Processing...' : 'Upload .txt or .csv File'}
+            </Button>
+            
+            {results.length > 0 && (
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">Results ({results.length})</h3>
+                        <div>
+                             <Button variant="outline" size="sm" onClick={() => handleDownload('csv')} className="mr-2"><FileDown className="mr-2 h-4 w-4" /> CSV</Button>
+                             <Button variant="outline" size="sm" onClick={() => handleDownload('json')}><FileDown className="mr-2 h-4 w-4" /> JSON</Button>
+                        </div>
+                    </div>
+                     <Card className="max-h-[300px] overflow-y-auto">
+                        <CardContent className="p-0">
+                           <div className="w-full text-sm">
+                                <div className="grid grid-cols-[40px_1fr_2fr] gap-4 p-2 font-bold bg-secondary/50 sticky top-0">
+                                    <div>#</div>
+                                    <div>Input</div>
+                                    <div>Hash</div>
+                                </div>
+                                {results.map(res => (
+                                    <div key={res.line} className="grid grid-cols-[40px_1fr_2fr] gap-4 p-2 border-b last:border-b-0 font-code text-xs">
+                                        <div className="truncate">{res.line}</div>
+                                        <div className="truncate">{res.input}</div>
+                                        <div className="truncate">{res.hash}</div>
+                                    </div>
+                                ))}
+                           </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export function HashGenerator() {
   return (
     <Card className="w-full max-w-2xl shadow-2xl bg-card">
@@ -357,9 +543,10 @@ export function HashGenerator() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="generator" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="generator" className="flex-1"><ShieldCheck className="mr-2" />Generator</TabsTrigger>
             <TabsTrigger value="comparison" className="flex-1"><GitCompareArrows className="mr-2" />Compare</TabsTrigger>
+            <TabsTrigger value="batch" className="flex-1"><Upload className="mr-2" />Batch</TabsTrigger>
           </TabsList>
           <TabsContent value="generator" className="pt-6">
             <HashGeneratorTool />
@@ -367,9 +554,11 @@ export function HashGenerator() {
           <TabsContent value="comparison" className="pt-6">
             <HashComparisonTool />
           </TabsContent>
+           <TabsContent value="batch" className="pt-6">
+            <BatchHashingTool />
+          </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
   );
 }
-    
